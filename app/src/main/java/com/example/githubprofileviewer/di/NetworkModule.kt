@@ -1,6 +1,6 @@
 package com.example.githubprofileviewer.di
 
-import com.example.githubprofileviewer.data.GithubApi
+import com.example.githubprofileviewer.data.api.GithubApi
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
