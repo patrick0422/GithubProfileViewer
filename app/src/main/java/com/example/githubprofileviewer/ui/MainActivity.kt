@@ -2,6 +2,7 @@ package com.example.githubprofileviewer.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.databinding.DataBindingUtil
 import coil.load
@@ -11,6 +12,7 @@ import com.example.githubprofileviewer.data.model.GithubUserProfile
 import com.example.githubprofileviewer.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.rxkotlin.addTo
 import io.reactivex.schedulers.Schedulers
 
 @AndroidEntryPoint
@@ -22,12 +24,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         buttonSearch.setOnClickListener {
-            mainViewModel.getUserProfile(searchView.text.toString())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe { profile ->
-                    setData(profile)
+            mainViewModel.getUserProfile(searchView.text.toString()).subscribe(
+                {
+                    setData(it)
+                },
+                {
+                    Toast.makeText(this@MainActivity, it.stackTraceToString(), Toast.LENGTH_SHORT).show()
                 }
+            ).addTo(mainViewModel.compositeDisposable)
         }
     }
 
@@ -38,5 +42,11 @@ class MainActivity : AppCompatActivity() {
         }
         textUserName.text = profile.name
         textUserNickName.text = profile.login
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+
+        mainViewModel.compositeDisposable.dispose()
     }
 }
